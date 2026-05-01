@@ -1,0 +1,3048 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ZENITH OS | Pro Productivity Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+/* ---------- RESET & VARIABLES ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Vazirmatn', 'Inter', sans-serif;
+}
+
+:root {
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --primary-glow: rgba(99, 102, 241, 0.5);
+  --accent: #f43f5e;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #0ea5e9;
+  --bg-base: #f8fafc;
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --priority-low: #10b981;
+  --priority-medium: #f59e0b;
+  --priority-high: #ef4444;
+  --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --radius-lg: 28px;
+  --radius-md: 12px;
+  --drawer-width: 280px;
+  --header-height: 70px;
+  --bg-mesh: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+             radial-gradient(at 100% 0%, rgba(244, 63, 94, 0.1) 0px, transparent 50%),
+             radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
+             radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
+  --input-bg: rgba(255,255,255,0.9);
+  --surface: rgba(255,255,255,0.8);
+}
+
+[data-theme="dark"] {
+  --bg-base: #020617;
+  --glass: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --card-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3);
+  --bg-mesh: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.2) 0px, transparent 50%),
+             radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.15) 0px, transparent 50%);
+  --input-bg: rgba(30,41,59,0.9);
+  --surface: rgba(30,41,59,0.8);
+}
+
+body {
+  background: var(--bg-base);
+  background-image: var(--bg-mesh);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ---------- LAYOUT ---------- */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 2rem;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* ----- desktop menu toggle (hidden on mobile) ----- */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+  background: var(--primary);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  border: none;
+}
+
+/* ---------- MOBILE HAMBURGER MENU & DRAWER ---------- */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1003;
+  background: var(--primary);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+}
+.hamburger:hover {
+  transform: scale(1.05);
+}
+
+.drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-top: 1px solid var(--glass-border);
+  border-radius: 28px 28px 0 0;
+  z-index: 1002;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0 2rem 0;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.drawer.open {
+  transform: translateY(0);
+}
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.drawer-overlay.open {
+  display: block;
+  opacity: 1;
+}
+.drawer .nav-item {
+  margin: 4px 16px;
+  border-radius: 12px;
+}
+
+/* ---------- RESPONSIVE BREAKPOINT (MOBILE) ---------- */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  .menu-toggle {
+    display: none !important;
+  }
+  .hamburger {
+    display: flex;
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.5rem;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem 1rem 5rem 1rem;
+    padding-top: calc(var(--header-height) + 0.5rem);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem;
+  }
+  .stat-card {
+    padding: 1rem;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .note-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .goals-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .goals-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .timer-display {
+    font-size: 3.5rem !important;
+  }
+  .session-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .session-card {
+    margin: 0;
+  }
+  .goal-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .timer-controls {
+    flex-wrap: wrap;
+  }
+  .command-palette .cp-box {
+    width: 90%;
+    margin: 0 auto;
+  }
+  .btn {
+    padding: 10px 16px;
+    min-height: 44px;
+    width: 100%;
+    text-align: center;
+  }
+  .task-item, .habit-row {
+    padding: 10px;
+  }
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  .weekly-table {
+    min-width: 600px;
+  }
+  .cell-content {
+    font-size: 0.7rem;
+    padding: 2px;
+  }
+  .time-label {
+    font-size: 0.65rem;
+    width: 45px;
+  }
+  .weekly-table th,
+  .weekly-table td {
+    padding: 2px;
+  }
+
+  .assistant-btn {
+    bottom: 20px !important;
+    left: 20px !important;
+    width: 56px;
+    height: 56px;
+    font-size: 26px;
+    z-index: 1002;
+  }
+
+  .chat-window {
+    bottom: 85px !important;
+    left: 10px !important;
+    width: calc(100% - 20px) !important;
+    max-width: 350px;
+    max-height: 60vh;
+  }
+
+  .drawer.open ~ .assistant-btn,
+  .drawer.open ~ .chat-window {
+    z-index: 1000;
+  }
+}
+
+/* ---------- UI COMPONENTS (Enhanced) ---------- */
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1.5rem;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover {
+  transform: translateY(-10px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-glow);
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  color: white;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-primary:hover::after {
+  opacity: 1;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  box-shadow: none;
+}
+.btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.nav-item {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  transition: 0.2s;
+  border-radius: var(--radius-md);
+  margin: 4px 12px;
+}
+.nav-item.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.nav-item:hover:not(.active) {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* ---------- DASHBOARD SPECIFIC ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.stat-card {
+  text-align: center;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* ---------- CALENDAR STYLES ---------- */
+.calendar-container {
+  width: 100%;
+  text-align: center;
+}
+.calendar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.calendar-title {
+  font-weight: bold;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.calendar-day {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  border-radius: 50%;
+  background: transparent;
+  transition: 0.2s;
+}
+.calendar-day.today {
+  background: var(--primary);
+  color: white;
+  font-weight: bold;
+}
+.calendar-day.other-month {
+  opacity: 0.3;
+}
+@media (max-width: 768px) {
+  .calendar-day {
+    font-size: 0.8rem;
+  }
+}
+
+/* ---------- HABITS MINI ---------- */
+.habits-mini-list {
+  margin-top: 1rem;
+}
+.habit-mini-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--glass-border);
+}
+.habit-mini-item:last-child {
+  border-bottom: none;
+}
+.habit-mini-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.habit-mini-streak {
+  background: linear-gradient(45deg, #f43f5e, #fb923c);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+}
+.habit-mini-toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 1rem;
+  transition: 0.2s;
+}
+.habit-mini-toggle.completed {
+  background: var(--primary);
+  color: white;
+}
+
+/* ---------- MODULES ---------- */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  transition: 0.2s;
+}
+.task-item:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+.task-item.dragging {
+  opacity: 0.5;
+  border: 2px dashed var(--primary);
+}
+
+.habit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+.habit-streak {
+  background: linear-gradient(45deg, #f43f5e, #fb923c);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+/* ---------- NOTES MODULE (ENHANCED) ---------- */
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+.note-card {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.note-card:hover {
+  transform: translateY(-5px);
+}
+.note-card .note-color-bar {
+  height: 8px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.note-card .note-title {
+  font-weight: 700;
+  margin: 15px 10px 5px 10px;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-card .note-content-preview {
+  flex: 1;
+  margin: 0 10px 10px 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}
+.note-card .note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 1px solid var(--glass-border);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+.note-actions {
+  display: flex;
+  gap: 5px;
+}
+.note-actions button {
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+.note-editor {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.note-editor-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(0,0,0,0.02);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.note-editor-toolbar input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.note-editor-toolbar select {
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+.note-editor-title {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+  width: 70%;
+  min-width: 200px;
+  margin-bottom: 10px;
+}
+.note-editor-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  resize: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  width: 100%;
+}
+
+/* ---------- FOCUS MODULE ---------- */
+.focus-container {
+  text-align: center;
+}
+.timer-display {
+  font-size: 6rem;
+  font-weight: 800;
+  font-family: 'Inter', monospace;
+  background: linear-gradient(to bottom, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 10px 10px rgba(99, 102, 241, 0.2));
+  letter-spacing: -2px;
+  line-height: 1.2;
+  margin: 1rem 0;
+}
+.timer-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+.timer-progress {
+  height: 8px;
+  background: var(--glass-border);
+  border-radius: 20px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+.timer-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  width: 100%;
+  transition: width 0.1s linear;
+}
+.session-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 2rem 0;
+}
+.session-card {
+  text-align: center;
+  padding: 1rem;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: var(--radius-md);
+  flex: 1;
+  margin: 0 5px;
+}
+.session-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.session-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.session-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px dashed var(--glass-border);
+}
+.timer-running {
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ---------- FOCUS ENHANCEMENTS ---------- */
+.focus-options {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.focus-presets {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+.preset-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--primary);
+  transition: 0.3s;
+}
+.preset-btn.active {
+  background: var(--primary);
+  color: white;
+}
+.xp-badge {
+  background: linear-gradient(45deg, #f59e0b, #ef4444);
+  color: white;
+  padding: 5px 15px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+/* ---------- WEEKLY SHEET STYLES (ENHANCED) ---------- */
+.weekly-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(99,102,241,0.05);
+  border-radius: var(--radius-md);
+  align-items: center;
+}
+.weekly-toolbar select, .weekly-toolbar input, .weekly-toolbar button {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+.weekly-toolbar button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.weekly-toolbar button:hover {
+  background: var(--primary-dark);
+}
+
+.sheet-outer-container {
+  overflow-x: auto;
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  margin-top: 10px;
+}
+
+.weekly-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.weekly-table th,
+.weekly-table td {
+  border: 1px solid var(--glass-border);
+  padding: 5px;
+  height: 50px;
+}
+
+.weekly-table th {
+  background: rgba(99, 102, 241, 0.1);
+  backdrop-filter: blur(5px);
+  font-weight: bold;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  position: sticky;
+  top: 0;
+}
+
+.time-label {
+  background: #f1f5f9;
+  font-weight: bold;
+  width: 70px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.cell-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 100%;
+}
+.cell-input {
+  width: 70%;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font-size: 0.85rem;
+  transition: 0.2s;
+  padding: 2px;
+}
+.cell-input:focus {
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 4px;
+}
+.cell-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+.cell-completed .cell-input {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* ---------- ASSISTANT ---------- */
+.assistant-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #6366f1, #f43f5e, #0ea5e9);
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite, float 3s ease-in-out infinite;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+  z-index: 1000;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s;
+}
+.assistant-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 15px 35px rgba(99, 102, 241, 0.7);
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+.chat-window {
+  position: fixed;
+  bottom: 100px;
+  left: 20px;
+  width: 360px;
+  max-height: 550px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 30px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  border: 1px solid var(--primary-glow);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+[data-theme="dark"] .chat-window {
+  background: rgba(15, 23, 42, 0.95);
+}
+.chat-window .chat-header {
+  padding: 20px;
+  background: linear-gradient(135deg, var(--primary), #a855f7, #ec4899);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+.chat-window .chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  max-height: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  animation: slideIn 0.3s ease;
+}
+.message.user {
+  align-self: flex-end;
+}
+.message.bot {
+  align-self: flex-start;
+}
+.message .bubble {
+  padding: 12px 18px;
+  border-radius: 22px;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.message.user .bubble {
+  background: var(--primary);
+  color: white;
+  border-bottom-left-radius: 4px;
+}
+.message.bot .bubble {
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-bottom-right-radius: 4px;
+}
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+  padding: 12px 18px;
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  width: fit-content;
+  margin-bottom: 5px;
+}
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  animation: typing 1.4s infinite;
+}
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30% { transform: translateY(-10px); opacity: 1; }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chat-window .chat-input-area {
+  display: flex;
+  padding: 15px;
+  gap: 10px;
+  border-top: 1px solid var(--glass-border);
+  background: var(--surface);
+}
+.chat-window .chat-input-area input {
+  flex: 1;
+  border-radius: 30px;
+  border: 1px solid var(--glass-border);
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  outline: none;
+  transition: border 0.2s;
+}
+.chat-window .chat-input-area input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+.chat-window .chat-input-area button {
+  margin: 0;
+  padding: 12px 24px;
+  border-radius: 30px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+.chat-window .chat-input-area button:hover {
+  background: var(--primary-dark);
+  transform: scale(1.02);
+}
+
+/* ---------- COMMAND PALETTE ---------- */
+.command-palette {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 10vh;
+  z-index: 1000;
+}
+.command-palette.open {
+  display: flex;
+}
+.cp-box {
+  width: 600px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.cp-input {
+  width: 100%;
+  padding: 1.2rem;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+  font-size: 1.1rem;
+}
+
+/* ---------- CUSTOM SCROLLBAR ---------- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+    </style>
+</head>
+<body data-theme="light">
+    <div class="app-container">
+        <!-- Desktop sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div style="padding: 2rem; text-align: center;">
+                <h1 style="font-size: 1.5rem; color: var(--primary); font-weight: 900;">ZENITH OS</h1>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">Productivity Reinvented</p>
+            </div>
+            <nav id="main-nav">
+                <div class="nav-item active" data-view="dashboard"><span>🏠</span> Dashboard</div>
+                <div class="nav-item" data-view="tasks"><span>✅</span> Tasks</div>
+                <div class="nav-item" data-view="habits"><span>🔥</span> Habits</div>
+                <div class="nav-item" data-view="notes"><span>📝</span> Notes</div>
+                <div class="nav-item" data-view="goals"><span>🎯</span> Goals</div>
+                <div class="nav-item" data-view="focus"><span>⏱️</span> Focus</div>
+                <div class="nav-item" data-view="stats"><span>📊</span> Stats</div>
+                <div class="nav-item" data-view="weekly"><span>📅</span> Weekly Planner</div>
+                <div class="nav-item" data-view="water"><span>💧</span> Water Tracker</div>
+                <div class="nav-item" data-view="books"><span>📚</span> Book Companion</div>
+                <div class="nav-item" id="exportBtn"><span>📤</span> Export</div>
+                <div class="nav-item" id="importBtn"><span>📥</span> Import</div>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </nav>
+            <div style="margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--surface-border);">
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.toggleTheme()">🌓 Toggle Theme</button>
+                <p style="margin-top: 10px; font-size: 0.7rem; text-align: center; color: var(--text-secondary);">Ctrl + K for Commands</p>
+            </div>
+        </aside>
+
+        <!-- Mobile hamburger menu and drawer -->
+        <button class="hamburger" id="hamburger" onclick="app.toggleDrawer()">☰</button>
+        <div class="drawer-overlay" id="drawerOverlay" onclick="app.closeDrawer()"></div>
+        <div class="drawer" id="drawer">
+            <div style="padding: 2rem; text-align: center;">
+                <h1 style="font-size: 1.5rem; color: var(--primary); font-weight: 900;">ZENITH OS</h1>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">Productivity Reinvented</p>
+            </div>
+            <nav id="drawer-nav">
+                <div class="nav-item active" data-view="dashboard"><span>🏠</span> Dashboard</div>
+                <div class="nav-item" data-view="tasks"><span>✅</span> Tasks</div>
+                <div class="nav-item" data-view="habits"><span>🔥</span> Habits</div>
+                <div class="nav-item" data-view="notes"><span>📝</span> Notes</div>
+                <div class="nav-item" data-view="goals"><span>🎯</span> Goals</div>
+                <div class="nav-item" data-view="focus"><span>⏱️</span> Focus</div>
+                <div class="nav-item" data-view="stats"><span>📊</span> Stats</div>
+                <div class="nav-item" data-view="weekly"><span>📅</span> Weekly Planner</div>
+                <div class="nav-item" data-view="water"><span>💧</span> Water Tracker</div>
+                <div class="nav-item" data-view="books"><span>📚</span> Book Companion</div>
+                <div class="nav-item" id="mobileExportBtn"><span>📤</span> Export</div>
+                <div class="nav-item" id="mobileImportBtn"><span>📥</span> Import</div>
+            </nav>
+            <div style="margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--surface-border);">
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.toggleTheme()">🌓 Toggle Theme</button>
+            </div>
+        </div>
+
+        <main class="main-content" id="app-view"></main>
+    </div>
+
+    <!-- desktop menu toggle (hidden on mobile) -->
+    <button class="menu-toggle" id="menuToggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+    <!-- Assistant UI -->
+    <div class="assistant-btn" onclick="app.toggleChat()">🤖</div>
+    <div id="chat-window" class="chat-window">
+        <div class="chat-header">Zenith Smart Assistant</div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <input id="chat-input" type="text" placeholder="Ask...">
+            <button onclick="app.sendChatMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="command-palette" id="cmd-palette">
+        <div class="cp-box">
+            <input type="text" class="cp-input" id="cp-input" placeholder="Enter command (e.g., 'add task buy milk')...">
+            <div id="cp-results" style="max-height: 300px; overflow-y: auto; padding: 10px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 1. Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfT8TrpgtF82amdwWvtFOCDOy3fOLoVJU",
+            authDomain: "sara2-aea86.firebaseapp.com",
+            projectId: "sara2-aea86",
+            storageBucket: "sara2-aea86.firebasestorage.app",
+            messagingSenderId: "132818068822",
+            appId: "1:132818068822:web:aed1614191f55e2824a2f7",
+            measurementId: "G-JBL8SR10JY"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fbApp);
+        const docRef = doc(db, "zenith_data", "main_profile");
+
+        // San Diego timezone
+        const SAN_DIEGO_TZ = "America/Los_Angeles";
+        function getSanDiegoNow() {
+            return new Date(new Date().toLocaleString("en-US", { timeZone: SAN_DIEGO_TZ }));
+        }
+        function getTodaySanDiegoStr() {
+            return getSanDiegoNow().toISOString().split("T")[0];
+        }
+
+        const defaultState = {
+            tasks: [],
+            habits: [],
+            notes: [],
+            goals: [],
+            reminders: [],
+            focusTime: 0,
+            history: { focus: [10, 25, 15, 45, 30, 20, 50] },
+            lastVisit: null,
+            focusSessions: [],
+            xp: 0,
+            weeklyData: {},
+            waterEntries: [],
+            books: []
+        };
+
+        const app = {
+            state: {
+                currentView: 'dashboard',
+                ...defaultState
+            },
+            charts: {},
+            timer: { 
+                totalSeconds: 25 * 60, 
+                timeLeft: 25 * 60, 
+                interval: null, 
+                running: false,
+                startTime: null,
+                remainingOnStart: null
+            },
+            alarmInterval: null,
+            isInitialLoad: false,
+            lastIntent: null,
+            lastParams: {},
+            conversationHistory: [],
+
+            async save() {
+                if (!this.isInitialLoad) {
+                    console.log("⏳ Initial load not yet complete, skipping save.");
+                    return;
+                }
+                const dataToSave = { ...this.state };
+                delete dataToSave.currentView;
+                try {
+                    await setDoc(docRef, dataToSave);
+                    console.log("✅ Synced to Firebase");
+                } catch (error) {
+                    console.error("❌ Firebase save error:", error);
+                }
+            },
+
+            async init() {
+                this.toast("Connecting to server...", "info");
+                
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        this.state = { 
+                            ...this.state,
+                            ...cloudData,
+                            currentView: this.state.currentView 
+                        };
+                        this.isInitialLoad = true;
+                    } else {
+                        this.isInitialLoad = true;
+                        this.save(); 
+                    }
+                    this.render();
+                    this.updateActiveNav();
+                });
+
+                this.checkMidnightReset();
+                this.attachEvents();
+                this.startClock();
+                this.startReminderChecker();
+
+                document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) {
+                            this.closeDrawer();
+                        }
+                    });
+                });
+
+                const savedTimer = localStorage.getItem('zenith_timer_start');
+                if (savedTimer) {
+                    try {
+                        const { startTime, remaining, total } = JSON.parse(savedTimer);
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const newTimeLeft = Math.max(0, remaining - elapsed);
+                        this.timer.timeLeft = newTimeLeft;
+                        this.timer.totalSeconds = total;
+                        if (newTimeLeft > 0) {
+                            this.timer.running = true;
+                            this.startTimer();
+                        } else {
+                            localStorage.removeItem('zenith_timer_start');
+                            this.completeTimer();
+                        }
+                    } catch (e) {
+                        console.warn('Error restoring timer', e);
+                    }
+                }
+            },
+
+            toggleDrawer() {
+                const drawer = document.getElementById('drawer');
+                const overlay = document.getElementById('drawerOverlay');
+                drawer.classList.toggle('open');
+                overlay.classList.toggle('open');
+            },
+            closeDrawer() {
+                const drawer = document.getElementById('drawer');
+                const overlay = document.getElementById('drawerOverlay');
+                drawer.classList.remove('open');
+                overlay.classList.remove('open');
+            },
+
+            updateActiveNav() {
+                const view = this.state.currentView;
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (item.dataset.view === view) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            },
+
+            checkMidnightReset() {
+                const today = getTodaySanDiegoStr();
+                const sdNow = getSanDiegoNow();
+                const yesterday = new Date(sdNow);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                if (this.state.lastVisit !== today) {
+                    this.state.habits.forEach(h => {
+                        h.completedToday = false;
+                        if (h.lastDone && h.lastDone !== yesterdayStr && h.lastDone !== today) {
+                            h.streak = 0;
+                        }
+                    });
+                    this.state.lastVisit = today;
+                    this.save();
+                    this.toast('🌅 New day started!', 'info');
+                }
+            },
+
+            toggleHabit(id) {
+                const h = this.state.habits.find(h => h.id === id);
+                if (!h) return;
+                const today = getTodaySanDiegoStr();
+                if (!h.completedToday) {
+                    h.completedToday = true;
+                    const sdNow = getSanDiegoNow();
+                    const yesterday = new Date(sdNow);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    if (h.lastDone === yesterdayStr) {
+                        h.streak = (h.streak || 0) + 1;
+                    } else if (h.lastDone !== today) {
+                        h.streak = 1;
+                    }
+                    h.lastDone = today;
+                } else {
+                    h.completedToday = false;
+                }
+                this.save();
+                this.render();
+            },
+
+            startReminderChecker() {
+                if (this.alarmInterval) clearInterval(this.alarmInterval);
+                this.alarmInterval = setInterval(() => {
+                    this.checkReminders();
+                }, 60000);
+            },
+
+            checkReminders() {
+                const now = getSanDiegoNow();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                this.state.reminders.forEach(rem => {
+                    const [hour, minute] = rem.time.split(':').map(Number);
+                    if (hour === currentHour && minute === currentMinute) {
+                        this.playAlarm();
+                        this.toast(`🔔 Reminder: ${rem.text}`, 'success');
+                        this.sendTelegramMessage(rem.text);
+                        this.deleteReminder(rem.id, false);
+                    }
+                });
+            },
+
+            sendTelegramMessage(text) {
+                const botToken = '8348342500:AAGbQWfr4LhvB3HZRWFZjv_GIVlMXAhnDIw';
+                const chatId = '832244920';
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: `🔔 ZENITH OS Reminder:\n\n${text}` })
+                }).catch(err => console.error('Telegram Error:', err));
+            },
+
+            playAlarm() {
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {
+                    console.warn('Web Audio not supported', e);
+                }
+            },
+
+            render() {
+                const view = document.getElementById('app-view');
+                if (!view) return;
+                view.innerHTML = '';
+                view.className = 'main-content fade-in';
+
+                switch(this.state.currentView) {
+                    case 'dashboard': this.renderDashboard(view); break;
+                    case 'tasks': this.renderTasks(view); break;
+                    case 'habits': this.renderHabits(view); break;
+                    case 'notes': this.renderNotes(view); break;
+                    case 'stats': this.renderStats(view); break;
+                    case 'focus': this.renderFocus(view); break;
+                    case 'goals': this.renderGoals(view); break;
+                    case 'weekly': this.renderWeekly(view); break;
+                    case 'water': this.renderWaterView(view); break;
+                    case 'books': this.renderBooksView(view); break;
+                }
+            },
+
+            /* ---------- EXPORT/IMPORT ---------- */
+            exportData() {
+                const dataToExport = { ...this.state };
+                delete dataToExport.currentView;
+                const dataStr = JSON.stringify(dataToExport, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `zenith_backup_${getSanDiegoNow().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.toast('✅ Backup exported successfully');
+            },
+
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                if (!confirm('Are you sure you want to import this file? Current data will be replaced.')) {
+                    document.getElementById('importFile').value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        delete imported.currentView;
+                        this.state = { ...this.state, ...imported };
+                        this.save();
+                        this.render();
+                        this.toast('✅ Data imported successfully');
+                    } catch (err) {
+                        this.toast('❌ Error reading file');
+                        console.error(err);
+                    }
+                    document.getElementById('importFile').value = '';
+                };
+                reader.readAsText(file);
+            },
+
+            /* ---------- DASHBOARD ---------- */
+            renderDashboard(container) {
+                const completedTasks = this.state.tasks.filter(t => t.completed).length;
+                const prodScore = this.calculateProductivityScore();
+                const calendarHTML = this.generateCalendarFixed();
+
+                const miniHabits = this.state.habits.slice(0, 3);
+                const habitsHTML = miniHabits.map(h => `
+                    <div class="habit-mini-item">
+                        <div class="habit-mini-info">
+                            <span class="habit-mini-streak">🔥 ${h.streak || 0}</span>
+                            <span>${h.name}</span>
+                        </div>
+                        <div class="habit-mini-toggle ${h.completedToday ? 'completed' : ''}" 
+                             onclick="app.toggleHabit(${h.id})">
+                            ${h.completedToday ? '✓' : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = `
+                    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h2 style="font-size: 1.8rem;">Hello! Welcome ✨</h2>
+                            <p id="clock" style="color: var(--primary); font-weight: 700;"></p>
+                        </div>
+                        <div class="glass-card" style="padding: 0.5rem 1.5rem; text-align:center;">
+                            <div style="font-size:0.7rem; color:var(--text-secondary);">Productivity Score</div>
+                            <div style="font-size:1.5rem; font-weight:800; color:${prodScore > 70 ? 'var(--success)' : 'var(--warning)'}">${prodScore}%</div>
+                        </div>
+                    </header>
+
+                    <div class="stats-grid">
+                        <div class="glass-card stat-card">
+                            <div class="stat-value" id="taskCounter">0</div>
+                            <div style="color: var(--text-secondary);">Tasks Completed</div>
+                        </div>
+                        <div class="glass-card stat-card">
+                            <div class="stat-value" id="habitCounter">0</div>
+                            <div style="color: var(--text-secondary);">Active Habits</div>
+                        </div>
+                        <div class="glass-card stat-card">
+                            <div class="stat-value" id="focusCounter">0</div>
+                            <div style="color: var(--text-secondary);">Today's Focus (min)</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div>
+                            <div class="glass-card">
+                                <h3>Quick Tasks</h3>
+                                <div style="display:flex; gap:10px; margin: 15px 0; flex-wrap:wrap;">
+                                    <input type="text" id="quickTaskInput" class="cp-input" style="border: 1px solid var(--surface-border); border-radius:10px; flex:1; min-width:150px;" placeholder="Quick add task...">
+                                    <button id="quickAddTaskBtn" class="btn btn-primary">Add</button>
+                                </div>
+                                <div id="dashboard-tasks"></div>
+                            </div>
+
+                            <div class="glass-card">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <h3>🔥 Today's Habits</h3>
+                                    <button class="btn btn-secondary" style="padding:0.3rem 0.8rem;" onclick="app.state.currentView='habits'; app.render()">View All</button>
+                                </div>
+                                <div class="habits-mini-list">
+                                    ${this.state.habits.length === 0 ? '<p style="color:var(--text-secondary);">No habits logged</p>' : habitsHTML}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="glass-card">
+                                <h3>📅 Calendar</h3>
+                                ${calendarHTML}
+                            </div>
+
+                            <div class="glass-card">
+                                <h3>Quote of the Day</h3>
+                                <p style="font-style:italic; margin-top:15px; color:var(--text-secondary);">"The best way to predict the future is to create it."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="margin-top: 1.5rem;">
+                        <h3>⏰ Today's Reminders</h3>
+                        <div style="margin-top: 15px;">
+                            ${this.state.reminders.map(r => `
+                                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--surface-border); flex-wrap:wrap;">
+                                    <span><span style="font-weight:600; color:var(--primary);">${r.time}</span> - ${r.text}</span>
+                                    <button class="btn" style="padding:2px 8px; color:var(--accent);" onclick="app.deleteReminder(${r.id})">🗑️</button>
+                                </div>
+                            `).join('')}
+                            ${this.state.reminders.length === 0 ? '<p style="color:var(--text-secondary);">No reminders for today</p>' : ''}
+                        </div>
+                        <div style="display:flex; gap:5px; margin-top:15px; flex-wrap:wrap;">
+                            <input type="text" id="reminder-text" placeholder="Reminder text..." style="flex:2; min-width:150px; background:var(--input-bg); border:1px solid var(--surface-border); border-radius:10px; padding:8px;">
+                            <input type="time" id="reminder-time" style="flex:1; min-width:120px; background:var(--input-bg); border:1px solid var(--surface-border); border-radius:10px; padding:8px;">
+                            <button class="btn btn-primary" onclick="app.addReminder(document.getElementById('reminder-text').value, document.getElementById('reminder-time').value)">➕</button>
+                        </div>
+                    </div>
+                `;
+
+                this.animateValue("taskCounter", 0, completedTasks, 1000);
+                this.animateValue("habitCounter", 0, this.state.habits.length, 1000);
+                this.animateValue("focusCounter", 0, this.totalFocusToday(), 1000);
+
+                document.getElementById('quickAddTaskBtn').onclick = () => {
+                    const val = document.getElementById('quickTaskInput').value;
+                    if(val) this.addTask(val);
+                };
+
+                this.renderMiniTasks();
+            },
+
+            generateCalendarFixed() {
+                const now = getSanDiegoNow();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const today = now.getDate();
+
+                const firstDay = new Date(year, month, 1);
+                let offset = firstDay.getDay(); // 0 = Sunday
+
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                let html = `
+                    <div class="calendar-header">
+                        <span class="calendar-title">${monthNames[month]} ${year}</span>
+                    </div>
+                    <div class="calendar-weekdays">
+                        ${weekdayNames.map(d => `<span>${d}</span>`).join('')}
+                    </div>
+                    <div class="calendar-days">
+                `;
+
+                for (let i = 0; i < offset; i++) {
+                    html += `<div class="calendar-day other-month"></div>`;
+                }
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const isToday = (d === today) ? 'today' : '';
+                    html += `<div class="calendar-day ${isToday}">${d}</div>`;
+                }
+
+                const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
+                for (let i = offset + daysInMonth; i < totalCells; i++) {
+                    html += `<div class="calendar-day other-month"></div>`;
+                }
+
+                html += `</div>`;
+                return html;
+            },
+
+            renderMiniTasks() {
+                const list = document.getElementById('dashboard-tasks');
+                const recent = this.state.tasks.slice(-5).reverse();
+                list.innerHTML = recent.map(t => `
+                    <div class="task-item" style="border:none; padding:8px 0;">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="app.toggleTask(${t.id})">
+                        <span style="${t.completed ? 'text-decoration:line-through; opacity:0.5' : ''}">${t.title}</span>
+                    </div>
+                `).join('') || '<p style="text-align:center; color:var(--text-secondary);">List is empty</p>';
+            },
+
+            /* ---------- TASKS MODULE ---------- */
+            renderTasks(container) {
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                            <h2>Task List</h2>
+                            <button class="btn btn-primary" onclick="app.addTaskPrompt()">+ New Task</button>
+                        </div>
+                        <div id="task-list" style="margin-top: 20px;"></div>
+                    </div>
+                `;
+                this.renderTaskList();
+            },
+
+            renderTaskList() {
+                const list = document.getElementById('task-list');
+                list.innerHTML = this.state.tasks.map((t, idx) => `
+                    <div class="task-item" draggable="true" data-id="${t.id}" ondragstart="app.handleDragStart(event)">
+                        <div style="width:4px; height:20px; background:var(--priority-${t.priority}); border-radius:2px;"></div>
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="app.toggleTask(${t.id})">
+                        <span style="flex:1; ${t.completed ? 'text-decoration:line-through; color:var(--text-secondary)' : ''}">${t.title}</span>
+                        <button class="btn" style="color:var(--accent)" onclick="app.deleteTask(${t.id})">🗑️</button>
+                    </div>
+                `).join('');
+            },
+
+            handleDragStart(e) {
+                e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+                e.currentTarget.classList.add('dragging');
+            },
+
+            addTaskPrompt() {
+                const title = prompt("Enter new task title:");
+                if (title) this.addTask(title);
+            },
+
+            /* ---------- HABITS MODULE ---------- */
+            renderHabits(container) {
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                            <h2>Habit Tracker</h2>
+                            <button class="btn btn-primary" onclick="app.addHabitPrompt()">+ New Habit</button>
+                        </div>
+                        <div id="habits-list"></div>
+                    </div>
+                `;
+                this.renderHabitsList();
+            },
+
+            renderHabitsList() {
+                const list = document.getElementById('habits-list');
+                if (this.state.habits.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-secondary);">No habits added yet.</div>`;
+                    return;
+                }
+
+                list.innerHTML = this.state.habits.map(h => {
+                    const lastDoneDisplay = h.lastDone ? getSanDiegoNow().toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ }) : '---'; // For simplicity, using today's date format. Better to format h.lastDone.
+                    // We'll just show the lastDone string, or a formatted date.
+                    const lastDoneDate = h.lastDone ? new Date(h.lastDone + 'T00:00:00') : null;
+                    const lastDoneFormatted = lastDoneDate ? lastDoneDate.toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ }) : '---';
+                    return `
+                    <div class="habit-row">
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                            <div class="habit-streak">🔥 ${h.streak || 0}</div>
+                            <div>
+                                <div style="font-weight:700;">${h.name}</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary);">Last Checked: ${lastDoneFormatted}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <button class="btn ${h.completedToday ? 'btn-primary' : ''}" 
+                                    style="border:1px solid var(--primary)" 
+                                    onclick="app.toggleHabit(${h.id})">
+                                ${h.completedToday ? '✅ Done' : 'Check Today'}
+                            </button>
+                            <button class="btn" style="color:var(--accent)" onclick="app.deleteHabit(${h.id})">🗑️</button>
+                        </div>
+                    </div>
+                `;}).join('');
+            },
+
+            addHabitPrompt() {
+                const name = prompt("Enter new habit name:");
+                if (name) {
+                    const newHabit = { id: Date.now(), name, streak: 0, completedToday: false, lastDone: null };
+                    this.state.habits.push(newHabit);
+                    this.save();
+                    this.renderHabitsList();
+                }
+            },
+
+            deleteHabit(id) {
+                if (confirm('Are you sure you want to delete this habit?')) {
+                    this.state.habits = this.state.habits.filter(h => h.id !== id);
+                    this.save();
+                    this.renderHabitsList();
+                }
+            },
+
+            /* ---------- NOTES MODULE ---------- */
+            renderNotes(container) {
+                container.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; flex-wrap:wrap; gap:1rem;">
+                        <h2>📝 Notebook</h2>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <input type="text" id="noteSearch" class="cp-input" style="width:200px; border:1px solid var(--surface-border); border-radius:10px; padding:5px 15px;" placeholder="Search...">
+                            <button class="btn btn-primary" onclick="app.addNote()">+ New Note</button>
+                        </div>
+                    </div>
+                    <div id="notes-grid" class="note-grid"></div>
+                `;
+                this.renderNotesList();
+                document.getElementById('noteSearch').oninput = (e) => this.renderNotesList(e.target.value);
+            },
+
+            renderNotesList(filter = '') {
+                const grid = document.getElementById('notes-grid');
+                const filtered = this.state.notes.filter(n => n.title.includes(filter) || n.content.includes(filter));
+                
+                grid.innerHTML = filtered.map(n => {
+                    const bgColor = n.bgColor || 'var(--glass)';
+                    const textColor = n.textColor || 'inherit';
+                    return `
+                    <div class="glass-card note-card fade-in" style="background: ${bgColor}; color: ${textColor};" onclick="app.editNote(${n.id})">
+                        <div class="note-color-bar" style="background: ${n.color || 'transparent'};"></div>
+                        <div class="note-title">${n.title}</div>
+                        <div class="note-content-preview">${n.content}</div>
+                        <div class="note-footer">
+                            <span>${n.date}</span>
+                            <div class="note-actions">
+                                <button class="btn btn-secondary" style="padding:2px 6px;" onclick="event.stopPropagation(); app.duplicateNote(${n.id})">📋</button>
+                                <button class="btn" style="color:var(--accent); padding:2px 6px;" onclick="event.stopPropagation(); app.deleteNote(${n.id})">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `}).join('') || '<p style="grid-column:1/-1; text-align:center;">No notes found</p>';
+            },
+
+            addNote() {
+                const newNote = { 
+                    id: Date.now(), 
+                    title: 'Untitled', 
+                    content: '', 
+                    date: getSanDiegoNow().toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ }),
+                    bgColor: 'var(--glass)',
+                    textColor: 'var(--text-primary)',
+                    color: 'transparent'
+                };
+                this.state.notes.push(newNote);
+                this.save();
+                this.editNote(newNote.id);
+            },
+
+            duplicateNote(id) {
+                const note = this.state.notes.find(n => n.id === id);
+                if (!note) return;
+                const newNote = { 
+                    ...note, 
+                    id: Date.now(), 
+                    title: note.title + ' (Copy)',
+                    date: getSanDiegoNow().toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ })
+                };
+                this.state.notes.push(newNote);
+                this.save();
+                this.renderNotesList();
+                this.toast('Note duplicated');
+            },
+
+            editNote(id) {
+                const n = this.state.notes.find(n => n.id === id);
+                const view = document.getElementById('app-view');
+                view.innerHTML = `
+                    <div class="glass-card fade-in note-editor">
+                        <div class="note-editor-toolbar">
+                            <input type="color" id="noteBgColor" value="${n.bgColor || '#ffffff'}" title="Background Color">
+                            <input type="color" id="noteTextColor" value="${n.textColor || '#000000'}" title="Text Color">
+                            <select id="noteFontSize">
+                                <option value="0.9rem">Small</option>
+                                <option value="1rem" selected>Normal</option>
+                                <option value="1.2rem">Large</option>
+                                <option value="1.5rem">Extra Large</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="app.saveNoteFromEditor(${n.id})">💾 Save</button>
+                            <button class="btn btn-primary" onclick="app.saveAndExitNote(${n.id})">Back</button>
+                        </div>
+                        <input type="text" id="editNoteTitle" class="note-editor-title" value="${n.title.replace(/"/g, '&quot;')}" placeholder="Title">
+                        <textarea id="editNoteContent" class="note-editor-textarea" placeholder="Note content...">${n.content}</textarea>
+                        <div id="autosave-indicator" style="font-size:0.7rem; text-align:left; color:var(--success); opacity:0;">Saved ✓</div>
+                    </div>
+                `;
+
+                const titleInput = document.getElementById('editNoteTitle');
+                const contentInput = document.getElementById('editNoteContent');
+                const bgColorInput = document.getElementById('noteBgColor');
+                const textColorInput = document.getElementById('noteTextColor');
+                const fontSizeSelect = document.getElementById('noteFontSize');
+                
+                const updateLocalState = () => {
+                    n.title = titleInput.value;
+                    n.content = contentInput.value;
+                    n.bgColor = bgColorInput.value;
+                    n.textColor = textColorInput.value;
+                    n.fontSize = fontSizeSelect.value;
+                    const ind = document.getElementById('autosave-indicator');
+                    ind.style.opacity = '1';
+                    setTimeout(() => ind.style.opacity = '0', 1000);
+                };
+
+                titleInput.oninput = updateLocalState;
+                contentInput.oninput = updateLocalState;
+                bgColorInput.oninput = updateLocalState;
+                textColorInput.oninput = updateLocalState;
+                fontSizeSelect.onchange = updateLocalState;
+            },
+
+            saveNoteFromEditor(id) {
+                const n = this.state.notes.find(n => n.id === id);
+                if (!n) return;
+                this.save();
+                this.toast('Note saved');
+            },
+
+            saveAndExitNote(id) {
+                this.saveNoteFromEditor(id);
+                this.state.currentView = 'notes';
+                this.render();
+            },
+
+            deleteNote(id) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    this.state.notes = this.state.notes.filter(n => n.id !== id);
+                    this.save();
+                    this.renderNotesList();
+                }
+            },
+
+            /* ---------- REMINDERS ---------- */
+            addReminder(text, time) {
+                if (!text || !time) {
+                    this.toast('Please enter reminder text and time');
+                    return;
+                }
+                const newReminder = { id: Date.now(), text, time };
+                this.state.reminders.push(newReminder);
+                this.save();
+                this.toast('Reminder added');
+                document.getElementById('reminder-text').value = '';
+                document.getElementById('reminder-time').value = '';
+                this.render();
+            },
+
+            deleteReminder(id, confirmDelete = true) {
+                if (confirmDelete && !confirm('Delete this reminder?')) return;
+                this.state.reminders = this.state.reminders.filter(r => r.id !== id);
+                this.save();
+                if (confirmDelete) this.toast('Reminder deleted');
+                this.render();
+            },
+
+            /* ---------- GOALS MODULE ---------- */
+            renderGoals(container) {
+                const totalGoals = this.state.goals.length;
+                const completedGoals = this.state.goals.filter(g => (g.current / g.target) >= 1).length;
+                const completionRate = totalGoals ? Math.round((completedGoals / totalGoals) * 100) : 0;
+                
+                container.innerHTML = `
+                    <div class="goals-header">
+                        <h2>🎯 My Goals</h2>
+                        <div class="goals-stats">
+                            <div class="glass-card" style="padding: 0.5rem 1rem;"><span style="color:var(--primary);">${completedGoals}</span> of ${totalGoals} completed</div>
+                            <div class="glass-card" style="padding: 0.5rem 1rem;">Success Rate <span style="color:var(--success);">${completionRate}%</span></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap:wrap;">
+                        <input type="text" id="goalTitle" placeholder="Goal Title" style="flex:2; min-width:200px; background:var(--input-bg); border:1px solid var(--surface-border); border-radius:10px; padding:0.8rem;">
+                        <select id="goalCategory" style="flex:1; min-width:120px; background:var(--input-bg); border:1px solid var(--surface-border); border-radius:10px; padding:0.8rem;">
+                            <option value="short">Short-term</option>
+                            <option value="long">Long-term</option>
+                            <option value="life">Lifelong</option>
+                        </select>
+                        <input type="date" id="goalDueDate" style="flex:1; min-width:140px; background:var(--input-bg); border:1px solid var(--surface-border); border-radius:10px; padding:0.8rem;">
+                        <button class="btn btn-primary" onclick="app.addGoal()">➕ Add Goal</button>
+                    </div>
+                    <div id="goals-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;"></div>
+                `;
+                this.renderGoalsList();
+            },
+
+            renderGoalsList() {
+                const list = document.getElementById('goals-list');
+                if (!list) return;
+                if (this.state.goals.length === 0) {
+                    list.innerHTML = '<div class="glass-card" style="text-align:center;">🎯 No goals set yet. Add your first goal!</div>';
+                    return;
+                }
+                list.innerHTML = this.state.goals.map(g => {
+                    const percent = Math.min(100, Math.round((g.current / g.target) * 100));
+                    const isCompleted = percent >= 100;
+                    const dueDate = g.dueDate ? new Date(g.dueDate).toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ }) : 'No date';
+                    return `
+                        <div class="glass-card goal-card ${isCompleted ? 'completed' : ''}">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="font-size:1.2rem;">${g.title}</h3>
+                                <span class="goal-tag">${g.category === 'short' ? 'Short-term' : g.category === 'long' ? 'Long-term' : 'Lifelong'}</span>
+                            </div>
+                            <div style="margin: 0.5rem 0; color:var(--text-secondary); font-size:0.85rem;">📅 ${dueDate}</div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                                <span>Progress: ${g.current} / ${g.target}</span>
+                                <span style="color:${percent >= 100 ? 'var(--success)' : 'var(--primary)'};">${percent}%</span>
+                            </div>
+                            <div class="goal-progress-container">
+                                <div class="goal-progress-fill" style="width: ${percent}%;"></div>
+                            </div>
+
+                            <div class="goal-milestones">
+                                ${g.milestones ? g.milestones.map((m, idx) => `
+                                    <div class="milestone-item">
+                                        <input type="checkbox" class="milestone-checkbox" data-goal="${g.id}" data-index="${idx}" ${m.completed ? 'checked' : ''} onchange="app.toggleMilestone('${g.id}', ${idx})">
+                                        <span style="${m.completed ? 'text-decoration:line-through; opacity:0.6;' : ''}">${m.text}</span>
+                                    </div>
+                                `).join('') : ''}
+                            </div>
+
+                            <div class="goal-actions">
+                                <button class="btn" style="padding:0.3rem 0.8rem;" onclick="app.addMilestonePrompt('${g.id}')">➕ Subgoal</button>
+                                <button class="btn" style="padding:0.3rem 0.8rem; background:var(--primary); color:white;" onclick="app.updateGoalProgress('${g.id}')">📊 Update</button>
+                                <button class="btn" style="padding:0.3rem 0.8rem; color:var(--accent);" onclick="app.deleteGoal('${g.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            addGoal() {
+                const title = document.getElementById('goalTitle')?.value.trim();
+                if (!title) { this.toast('Please enter a goal title'); return; }
+                const category = document.getElementById('goalCategory')?.value || 'short';
+                const dueDate = document.getElementById('goalDueDate')?.value || null;
+                const newGoal = {
+                    id: Date.now().toString(),
+                    title,
+                    category,
+                    target: 100,
+                    current: 0,
+                    dueDate,
+                    milestones: [],
+                    createdAt: new Date().toISOString()
+                };
+                this.state.goals.push(newGoal);
+                this.save();
+                this.toast('New goal added');
+                this.renderGoals(document.getElementById('app-view'));
+            },
+
+            updateGoalProgress(goalId) {
+                const goal = this.state.goals.find(g => g.id === goalId);
+                if (!goal) return;
+                const newValue = prompt('Enter new progress value (0-100):', goal.current);
+                if (newValue === null) return;
+                const num = parseInt(newValue);
+                if (isNaN(num) || num < 0 || num > 100) {
+                    this.toast('Please enter a number between 0 and 100');
+                    return;
+                }
+                goal.current = num;
+                this.save();
+                this.renderGoalsList();
+                if (num >= goal.target) {
+                    this.toast(`🎉 Goal "${goal.title}" completed!`, 'success');
+                    this.playAlarm();
+                }
+            },
+
+            addMilestonePrompt(goalId) {
+                const goal = this.state.goals.find(g => g.id === goalId);
+                if (!goal) return;
+                const text = prompt('Enter subgoal text:');
+                if (!text) return;
+                if (!goal.milestones) goal.milestones = [];
+                goal.milestones.push({ text, completed: false });
+                this.save();
+                this.renderGoalsList();
+            },
+
+            toggleMilestone(goalId, index) {
+                const goal = this.state.goals.find(g => g.id === goalId);
+                if (goal && goal.milestones && goal.milestones[index]) {
+                    goal.milestones[index].completed = !goal.milestones[index].completed;
+                    this.save();
+                    const allCompleted = goal.milestones.every(m => m.completed);
+                    if (allCompleted && goal.current < goal.target) {
+                        goal.current = goal.target;
+                        this.toast(`🎯 All subgoals of "${goal.title}" completed!`, 'success');
+                    }
+                    this.renderGoalsList();
+                }
+            },
+
+            deleteGoal(id) {
+                if (confirm('Are you sure you want to delete this goal?')) {
+                    this.state.goals = this.state.goals.filter(g => g.id !== id);
+                    this.save();
+                    this.renderGoals(document.getElementById('app-view'));
+                }
+            },
+
+            /* ---------- ENHANCED FOCUS MODULE ---------- */
+            renderFocus(container) {
+                const totalToday = this.totalFocusToday();
+                const totalSessions = this.state.focusSessions.length;
+                const avgDuration = totalSessions ? Math.round(this.state.focusSessions.reduce((a, s) => a + s.duration, 0) / totalSessions / 60) : 0;
+                const recentSessions = this.state.focusSessions.slice(-5).reverse();
+
+                const progressPercent = ((this.timer.totalSeconds - this.timer.timeLeft) / this.timer.totalSeconds) * 100;
+                const currentMinutes = Math.floor(this.timer.totalSeconds / 60);
+                const isPomodoro = currentMinutes === 25;
+                const isLong = currentMinutes === 50;
+                const isBreak = currentMinutes === 5;
+
+                container.innerHTML = `
+                    <div class="focus-container">
+                        <h2 style="margin-bottom: 1rem;">🧘 Deep Focus</h2>
+                        <div class="glass-card">
+                            <div class="xp-badge">✨ Focus Level: ${this.state.xp} XP</div>
+
+                            <div class="focus-presets">
+                                <button class="preset-btn ${isPomodoro ? 'active' : ''}" onclick="app.setFocusTime(25)">Pomodoro</button>
+                                <button class="preset-btn ${isLong ? 'active' : ''}" onclick="app.setFocusTime(50)">Long Focus</button>
+                                <button class="preset-btn ${isBreak ? 'active' : ''}" onclick="app.setFocusTime(5)">Break</button>
+                            </div>
+
+                            <div class="timer-display ${this.timer.running ? 'timer-running' : ''}" id="focusTimerDisplay">
+                                ${this.formatTime(this.timer.timeLeft)}
+                            </div>
+                            <div class="timer-progress">
+                                <div class="timer-progress-fill" id="focusProgressFill" style="width: ${progressPercent}%;"></div>
+                            </div>
+
+                            <div class="focus-options">
+                                <select id="ambient-sound" class="btn" style="background: var(--surface);" onchange="app.toggleSound(this.value)">
+                                    <option value="none">🔇 No Sound</option>
+                                    <option value="rain">🌧️ Rain</option>
+                                    <option value="white-noise">🌫️ White Noise</option>
+                                </select>
+                            </div>
+
+                            <div class="timer-controls">
+                                <button class="btn btn-primary" id="startTimerBtn">${this.timer.running ? '⏸️ Stop' : '▶️ Start'}</button>
+                                <button class="btn" id="pauseTimerBtn">⏸️ Pause</button>
+                                <button class="btn" id="resetTimerBtn">🔄 Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="session-stats">
+                            <div class="session-card">
+                                <div class="session-value" id="todayFocusValue">${Math.round(totalToday)}</div>
+                                <div class="session-label">Today's Minutes</div>
+                            </div>
+                            <div class="session-card">
+                                <div class="session-value" id="totalSessionsValue">${totalSessions}</div>
+                                <div class="session-label">Total Sessions</div>
+                            </div>
+                            <div class="session-card">
+                                <div class="session-value" id="avgDurationValue">${avgDuration}</div>
+                                <div class="session-label">Average (min)</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card">
+                            <h3>📋 Last Sessions</h3>
+                            <div class="session-list" id="sessionList">
+                                ${recentSessions.map(s => `
+                                    <div class="session-item">
+                                        <span>${new Date(s.date).toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ })} - ${new Date(s.date).toLocaleTimeString('en-US', { timeZone: SAN_DIEGO_TZ })}</span>
+                                        <span style="color:var(--primary); font-weight:600;">${Math.round(s.duration/60)} min</span>
+                                    </div>
+                                `).join('')}
+                                ${recentSessions.length === 0 ? '<p style="text-align:center; color:var(--text-secondary);">No sessions recorded yet</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <audio id="ambient-audio" loop></audio>
+                `;
+
+                document.getElementById('startTimerBtn').onclick = () => {
+                    if (this.timer.running) this.pauseTimer();
+                    else this.startTimer();
+                    this.renderFocus(container);
+                };
+                document.getElementById('pauseTimerBtn').onclick = () => this.pauseTimer();
+                document.getElementById('resetTimerBtn').onclick = () => this.resetTimer();
+            },
+
+            setFocusTime(minutes) {
+                this.pauseTimer();
+                this.timer.totalSeconds = minutes * 60;
+                this.timer.timeLeft = this.timer.totalSeconds;
+                this.updateTimerDisplay();
+                if (this.state.currentView === 'focus') {
+                    this.renderFocus(document.getElementById('app-view'));
+                }
+            },
+
+            toggleSound(type) {
+                const audio = document.getElementById('ambient-audio');
+                if (!audio) return;
+                const sounds = {
+                    'rain': 'https://www.soundjay.com/nature/rain-01.mp3',
+                    'white-noise': 'https://www.soundjay.com/misc/sounds/white-noise-01.mp3'
+                };
+                
+                if (type === 'none' || !sounds[type]) {
+                    audio.pause();
+                    audio.src = '';
+                } else {
+                    audio.src = sounds[type];
+                    audio.play().catch(e => console.log("Sound playback requires user interaction", e));
+                }
+            },
+
+            startTimer() {
+                if (this.timer.running) return;
+                this.timer.running = true;
+                this.timer.startTime = Date.now();
+                this.timer.remainingOnStart = this.timer.timeLeft;
+                localStorage.setItem('zenith_timer_start', JSON.stringify({
+                    startTime: this.timer.startTime,
+                    remaining: this.timer.timeLeft,
+                    total: this.timer.totalSeconds
+                }));
+
+                this.timer.interval = setInterval(() => {
+                    if (this.timer.timeLeft > 0) {
+                        this.timer.timeLeft--;
+                        this.updateTimerDisplay();
+                    } else {
+                        this.completeTimer();
+                    }
+                }, 1000);
+                this.updateTimerDisplay();
+            },
+
+            pauseTimer() {
+                this.timer.running = false;
+                if (this.timer.interval) {
+                    clearInterval(this.timer.interval);
+                    this.timer.interval = null;
+                }
+                localStorage.setItem('zenith_timer_start', JSON.stringify({
+                    startTime: Date.now(),
+                    remaining: this.timer.timeLeft,
+                    total: this.timer.totalSeconds
+                }));
+                this.updateTimerDisplay();
+            },
+
+            resetTimer() {
+                this.pauseTimer();
+                this.timer.timeLeft = this.timer.totalSeconds;
+                this.updateTimerDisplay();
+                localStorage.removeItem('zenith_timer_start');
+            },
+
+            completeTimer() {
+                this.pauseTimer();
+                const duration = this.timer.totalSeconds - this.timer.timeLeft;
+                const session = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    duration: duration
+                };
+                this.state.focusSessions.push(session);
+                this.state.focusTime += Math.round(duration / 60);
+                this.state.xp += 10;
+                this.save();
+                this.toast('🎉 Focus session complete! +10 XP earned', 'success');
+                this.playAlarm();
+                this.resetTimer();
+                if (this.state.currentView === 'focus') {
+                    this.render();
+                }
+            },
+
+            updateTimerDisplay() {
+                const display = document.getElementById('focusTimerDisplay');
+                const progress = document.getElementById('focusProgressFill');
+                if (display) display.innerText = this.formatTime(this.timer.timeLeft);
+                if (progress) {
+                    const percent = ((this.timer.totalSeconds - this.timer.timeLeft) / this.timer.totalSeconds) * 100;
+                    progress.style.width = `${percent}%`;
+                }
+            },
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            },
+
+            totalFocusToday() {
+                const today = getSanDiegoNow().toDateString();
+                return this.state.focusSessions
+                    .filter(s => new Date(s.date).toDateString() === today)
+                    .reduce((acc, s) => acc + s.duration, 0) / 60;
+            },
+
+            /* ---------- STATS MODULE ---------- */
+            renderStats(container) {
+                container.innerHTML = `
+                    <h2>Statistics</h2>
+                    <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-top: 2rem;">
+                        <div class="glass-card">
+                            <h3>Task Status</h3>
+                            <canvas id="tasksChart"></canvas>
+                        </div>
+                        <div class="glass-card">
+                            <h3>Habit Consistency</h3>
+                            <canvas id="habitsChart"></canvas>
+                        </div>
+                        <div class="glass-card" style="grid-column: span 2;">
+                            <h3>Focus Time (Last 7 Days)</h3>
+                            <canvas id="focusLineChart"></canvas>
+                        </div>
+                    </div>
+                `;
+                this.initStatsCharts();
+            },
+
+            initStatsCharts() {
+                const ctxTasks = document.getElementById('tasksChart').getContext('2d');
+                const done = this.state.tasks.filter(t => t.completed).length;
+                const pending = this.state.tasks.length - done;
+
+                new Chart(ctxTasks, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Pending'],
+                        datasets: [{
+                            data: [done || 1, pending],
+                            backgroundColor: ['#10b981', '#6366f1']
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+
+                const ctxFocus = document.getElementById('focusLineChart').getContext('2d');
+                const last7Days = [];
+                const labels = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = getSanDiegoNow();
+                    d.setDate(d.getDate() - i);
+                    const dateStr = d.toDateString();
+                    labels.push(d.toLocaleDateString('en-US', { weekday: 'short', timeZone: SAN_DIEGO_TZ }));
+                    const total = this.state.focusSessions
+                        .filter(s => new Date(s.date).toDateString() === dateStr)
+                        .reduce((acc, s) => acc + s.duration, 0) / 60;
+                    last7Days.push(total);
+                }
+
+                new Chart(ctxFocus, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Focus Minutes',
+                            data: last7Days,
+                            borderColor: '#6366f1',
+                            tension: 0.4,
+                            fill: true,
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                        }]
+                    }
+                });
+            },
+
+            /* ---------- WEEKLY PLANNER ---------- */
+            renderWeekly(container) {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <button class="btn btn-secondary" onclick="app.state.currentView='dashboard'; app.render()" style="display: inline-flex; align-items: center; gap: 5px;">
+                                <span>←</span> Back
+                            </button>
+                            <h2 style="margin:0;">📅 Weekly Planner (24h)</h2>
+                            <div style="width:70px;"></div>
+                        </div>
+
+                        <div class="weekly-toolbar">
+                            <select id="bulkDaySelect">
+                                <option value="">Select Day</option>
+                                ${days.map(d => `<option value="${d}">${d}</option>`).join('')}
+                                <option value="ALL">All Days</option>
+                            </select>
+                            <select id="bulkHourSelect">
+                                <option value="">Select Hour</option>
+                                ${hours.map(h => `<option value="${h}">${h}</option>`).join('')}
+                                <option value="ALL">All Hours</option>
+                            </select>
+                            <input type="text" id="bulkText" placeholder="New text" style="flex:1;">
+                            <button id="bulkSetBtn" class="btn btn-primary">Apply Text</button>
+                            <button id="bulkClearBtn" class="btn btn-secondary">Clear Selection</button>
+                            <button id="bulkToggleCompleteBtn" class="btn btn-secondary">✓ Check/Uncheck</button>
+                        </div>
+
+                        <p style="font-size:0.8rem; color:gray; margin-bottom:10px;">Tip: Check the box to mark a task as complete.</p>
+                        <div class="sheet-outer-container">
+                            <table class="weekly-table">
+                                <thead>
+                                    <tr>
+                                        <th class="time-label">Time</th>
+                                        ${days.map(d => `<th>${d}</th>`).join('')}
+                                     </tr>
+                                </thead>
+                                <tbody>
+                                    ${hours.map(h => `
+                                         <tr>
+                                            <td class="time-label">${h}</td>
+                                            ${days.map(d => {
+                                                const id = `${d}-${h}`;
+                                                let cellData = this.state.weeklyData[id];
+                                                if (!cellData || typeof cellData === 'string') {
+                                                    cellData = { text: cellData || '', completed: false };
+                                                }
+                                                const text = cellData.text || '';
+                                                const completed = cellData.completed || false;
+                                                const completedClass = completed ? 'cell-completed' : '';
+                                                return `<td class="${completedClass}">
+                                                    <div class="cell-container">
+                                                        <input type="text" class="cell-input" 
+                                                            value="${text.replace(/"/g, '&quot;')}" 
+                                                            onchange="app.updateWeeklyCell('${id}', this.value)"
+                                                            placeholder="...">
+                                                        <input type="checkbox" class="cell-checkbox" 
+                                                            ${completed ? 'checked' : ''} 
+                                                            onchange="app.toggleWeeklyComplete('${id}')">
+                                                    </div>
+                                                 </td>`;
+                                            }).join('')}
+                                         </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('bulkSetBtn')?.addEventListener('click', () => this.bulkOperation('set'));
+                document.getElementById('bulkClearBtn')?.addEventListener('click', () => this.bulkOperation('clear'));
+                document.getElementById('bulkToggleCompleteBtn')?.addEventListener('click', () => this.bulkOperation('toggle'));
+            },
+
+            updateWeeklyCell(id, newText) {
+                let cell = this.state.weeklyData[id];
+                if (!cell || typeof cell === 'string') {
+                    cell = { text: cell || '', completed: false };
+                }
+                cell.text = newText;
+                this.state.weeklyData[id] = cell;
+                this.save();
+                this.toast('Saved', 'success');
+            },
+
+            toggleWeeklyComplete(id) {
+                let cell = this.state.weeklyData[id];
+                if (!cell || typeof cell === 'string') {
+                    cell = { text: cell || '', completed: false };
+                }
+                cell.completed = !cell.completed;
+                this.state.weeklyData[id] = cell;
+                this.save();
+                if (this.state.currentView === 'weekly') {
+                    this.renderWeekly(document.getElementById('app-view'));
+                }
+            },
+
+            bulkOperation(op) {
+                const daySelect = document.getElementById('bulkDaySelect');
+                const hourSelect = document.getElementById('bulkHourSelect');
+                const bulkText = document.getElementById('bulkText');
+                const selectedDay = daySelect.value;
+                const selectedHour = hourSelect.value;
+                const newText = bulkText.value;
+
+                if (!selectedDay && !selectedHour) {
+                    this.toast('Please select at least a day or an hour');
+                    return;
+                }
+
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+
+                let affected = 0;
+                for (const day of days) {
+                    if (selectedDay !== 'ALL' && selectedDay !== day) continue;
+                    for (const hour of hours) {
+                        if (selectedHour !== 'ALL' && selectedHour !== hour) continue;
+                        const id = `${day}-${hour}`;
+                        let cell = this.state.weeklyData[id];
+                        if (!cell || typeof cell === 'string') {
+                            cell = { text: cell || '', completed: false };
+                        }
+                        if (op === 'set' && newText) {
+                            cell.text = newText;
+                        } else if (op === 'clear') {
+                            cell.text = '';
+                            cell.completed = false;
+                        } else if (op === 'toggle') {
+                            cell.completed = !cell.completed;
+                        }
+                        this.state.weeklyData[id] = cell;
+                        affected++;
+                    }
+                }
+                this.save();
+                this.toast(`✅ ${affected} cells updated`, 'success');
+                if (this.state.currentView === 'weekly') {
+                    this.renderWeekly(document.getElementById('app-view'));
+                }
+            },
+
+            /* ========== NEW: WATER TRACKER ========== */
+            renderWaterView(container) {
+                const today = getTodaySanDiegoStr();
+                const todayEntries = this.state.waterEntries.filter(e => e.date === today);
+                const totalToday = todayEntries.reduce((sum, e) => sum + e.amount, 0);
+                const last7Days = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = getSanDiegoNow();
+                    d.setDate(d.getDate() - i);
+                    const dateStr = d.toISOString().split('T')[0];
+                    const dayTotal = this.state.waterEntries.filter(e => e.date === dateStr).reduce((s, e) => s + e.amount, 0);
+                    last7Days.push({ date: dateStr, total: dayTotal });
+                }
+
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <h2>💧 Water Tracker</h2>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 800; color: var(--info);">${totalToday} ml</div>
+                            <div style="color: var(--text-secondary);">Today's Water Intake</div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin: 1.5rem 0;">
+                            <button class="btn btn-primary" onclick="app.addWater(250)">💧 + 250ml</button>
+                            <button class="btn btn-primary" onclick="app.addWater(500)">💧 + 500ml</button>
+                            <button class="btn btn-primary" onclick="app.addWater(1000)">💧 + 1L</button>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <h3>📊 Last 7 Days</h3>
+                            <div style="margin-top: 0.5rem;">
+                                ${last7Days.map(day => `
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--glass-border); padding: 0.5rem 0;">
+                                        <span>${new Date(day.date + 'T00:00:00').toLocaleDateString('en-US', { timeZone: SAN_DIEGO_TZ })}</span>
+                                        <span style="font-weight: 600;">${day.total} ml</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            addWater(amount) {
+                const today = getTodaySanDiegoStr();
+                this.state.waterEntries.push({ id: Date.now(), date: today, amount });
+                this.save();
+                this.toast(`✅ ${amount} ml water added`, 'success');
+                this.render();
+            },
+
+            /* ========== NEW: BOOK COMPANION ========== */
+            renderBooksView(container) {
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <h2>📚 Book Companion</h2>
+                            <button class="btn btn-primary" onclick="app.addBookPrompt()">+ New Book</button>
+                        </div>
+                        <div id="books-list" style="margin-top: 2rem;"></div>
+                    </div>
+                `;
+                this.renderBooksList();
+            },
+
+            renderBooksList() {
+                const list = document.getElementById('books-list');
+                if (!list) return;
+                if (this.state.books.length === 0) {
+                    list.innerHTML = '<div class="glass-card" style="text-align: center;">📖 No books added yet.</div>';
+                    return;
+                }
+                list.innerHTML = this.state.books.map(b => {
+                    const percent = b.totalPages ? Math.round((b.currentPage / b.totalPages) * 100) : 0;
+                    const finishStatus = b.finishDate ? '✅ Completed' : (b.currentPage > 0 ? `📖 Page ${b.currentPage} of ${b.totalPages}` : 'Not started');
+                    return `
+                        <div class="glass-card" style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="font-size: 1.2rem;">${b.title}</h3>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">${b.author || 'Unknown Author'}</span>
+                            </div>
+                            <div style="margin: 0.5rem 0;">
+                                <div class="goal-progress-container">
+                                    <div class="goal-progress-fill" style="width: ${percent}%;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                    <span>${finishStatus}</span>
+                                    <span>${percent}%</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                                <button class="btn btn-secondary" onclick="app.updateBookPagePrompt('${b.id}')">📖 Log Page</button>
+                                <button class="btn btn-secondary" onclick="app.editBookPrompt('${b.id}')">✏️ Edit</button>
+                                <button class="btn btn-secondary" onclick="app.addBookNotePrompt('${b.id}')">📝 Note</button>
+                                ${b.notes ? `<span style="font-size: 0.8rem; color: var(--text-secondary);">📌 Note: ${b.notes}</span>` : ''}
+                                <button class="btn" style="color: var(--accent);" onclick="app.deleteBook('${b.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            addBookPrompt() {
+                const title = prompt("Book title:");
+                if (!title) return;
+                const author = prompt("Author (optional):") || "";
+                const totalPages = parseInt(prompt("Total pages:") || "0");
+                this.state.books.push({
+                    id: Date.now().toString(),
+                    title,
+                    author,
+                    totalPages: totalPages || 0,
+                    currentPage: 0,
+                    notes: "",
+                    startDate: new Date().toISOString(),
+                    finishDate: null
+                });
+                this.save();
+                this.toast(`Book "${title}" added`);
+                this.renderBooksView(document.getElementById('app-view'));
+            },
+
+            updateBookPagePrompt(bookId) {
+                const book = this.state.books.find(b => b.id === bookId);
+                if (!book) return;
+                const page = parseInt(prompt(`Page number read (up to ${book.totalPages || 'unlimited'}):`, book.currentPage));
+                if (isNaN(page)) return;
+                if (book.totalPages > 0 && page > book.totalPages) {
+                    this.toast("Page number exceeds total pages", "error");
+                    return;
+                }
+                book.currentPage = page;
+                if (book.totalPages > 0 && page >= book.totalPages && !book.finishDate) {
+                    book.finishDate = new Date().toISOString();
+                    this.toast(`🎉 Book "${book.title}" completed!`, "success");
+                    this.playAlarm();
+                }
+                this.save();
+                this.renderBooksView(document.getElementById('app-view'));
+            },
+
+            editBookPrompt(bookId) {
+                const book = this.state.books.find(b => b.id === bookId);
+                if (!book) return;
+                const newTitle = prompt("New title:", book.title);
+                if (newTitle) book.title = newTitle;
+                const newAuthor = prompt("New author:", book.author);
+                if (newAuthor !== null) book.author = newAuthor;
+                const newTotal = parseInt(prompt("New total pages:", book.totalPages));
+                if (!isNaN(newTotal)) book.totalPages = newTotal;
+                this.save();
+                this.toast("Edit saved");
+                this.renderBooksView(document.getElementById('app-view'));
+            },
+
+            addBookNotePrompt(bookId) {
+                const book = this.state.books.find(b => b.id === bookId);
+                if (!book) return;
+                const note = prompt("Enter your note:", book.notes || "");
+                if (note !== null) book.notes = note;
+                this.save();
+                this.toast("Note saved");
+                this.renderBooksView(document.getElementById('app-view'));
+            },
+
+            deleteBook(bookId) {
+                if (confirm("Are you sure you want to delete this book?")) {
+                    this.state.books = this.state.books.filter(b => b.id !== bookId);
+                    this.save();
+                    this.toast("Book deleted");
+                    this.renderBooksView(document.getElementById('app-view'));
+                }
+            },
+
+            /* ---------- ASSISTANT ---------- */
+            toggleChat() {
+                const win = document.getElementById('chat-window');
+                win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+                if (win.style.display === 'flex') {
+                    document.getElementById('chat-input').focus();
+                }
+            },
+
+            sendChatMessage() {
+                const input = document.getElementById('chat-input');
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                const chatMessages = document.getElementById('chat-messages');
+                const userDiv = document.createElement('div');
+                userDiv.className = 'message user';
+                userDiv.innerHTML = `<div class="bubble">${msg}</div>`;
+                chatMessages.appendChild(userDiv);
+
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = '<span></span><span></span><span></span>';
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                setTimeout(() => {
+                    chatMessages.removeChild(typingDiv);
+                    const reply = this.processCommand(msg);
+                    const botDiv = document.createElement('div');
+                    botDiv.className = 'message bot';
+                    botDiv.innerHTML = `<div class="bubble">${reply}</div>`;
+                    chatMessages.appendChild(botDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 600);
+
+                input.value = '';
+            },
+
+            levenshtein(a, b) {
+                const matrix = [];
+                for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+                for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+                for (let i = 1; i <= b.length; i++) {
+                    for (let j = 1; j <= a.length; j++) {
+                        if (b.charAt(i-1) === a.charAt(j-1)) {
+                            matrix[i][j] = matrix[i-1][j-1];
+                        } else {
+                            matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, matrix[i][j-1] + 1, matrix[i-1][j] + 1);
+                        }
+                    }
+                }
+                return matrix[b.length][a.length];
+            },
+
+            normalize(text) {
+                return text
+                    .replace(/[ًٌٍَُِّْ]/g, '')
+                    .replace(/[يى]/g, 'ی')
+                    .replace(/[ك]/g, 'ک')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+            },
+
+            processCommand(input) {
+                const normalized = this.normalize(input);
+                const words = normalized.split(/\s+/);
+
+                this.conversationHistory.push({ role: 'user', text: normalized });
+                if (this.conversationHistory.length > 5) this.conversationHistory.shift();
+
+                if (this.lastIntent && (normalized.includes('next') || normalized.includes('after'))) {
+                    if (this.lastIntent === 'weekly_today') {
+                        const response = this.handleWeeklyTomorrow();
+                        this.conversationHistory.push({ role: 'bot', text: response });
+                        return response;
+                    }
+                }
+
+                if (normalized.includes('complete') || normalized.includes('done') || normalized.includes('check off')) {
+                    const taskName = normalized.replace(/.*?(complete|done|check off)\s*/i, '').trim();
+                    if (taskName) {
+                        const task = this.state.tasks.find(t => !t.completed && (t.title.includes(taskName) || this.levenshtein(t.title, taskName) <= 2));
+                        if (task) {
+                            task.completed = true;
+                            task.completedAt = new Date().toISOString();
+                            this.save();
+                            this.render();
+                            return `✅ Task "${task.title}" marked as done.`;
+                        } else {
+                            return "❌ I couldn't find that task.";
+                        }
+                    }
+                }
+
+                if (normalized.includes('most focus') || normalized.includes('most productive day')) {
+                    const dayCounts = {};
+                    this.state.focusSessions.forEach(s => {
+                        const date = new Date(s.date).toLocaleDateString('en-US', { weekday: 'long', timeZone: SAN_DIEGO_TZ });
+                        dayCounts[date] = (dayCounts[date] || 0) + s.duration;
+                    });
+                    let bestDay = null, max = 0;
+                    for (let [day, total] of Object.entries(dayCounts)) {
+                        if (total > max) { max = total; bestDay = day; }
+                    }
+                    if (bestDay) return `🔥 Your most productive day is ${bestDay} with ${Math.round(max/60)} minutes of focus.`;
+                    return "Not enough data to analyze yet.";
+                }
+
+                if (normalized.includes('this week') && normalized.includes('focus')) {
+                    const oneWeekAgo = new Date(getSanDiegoNow());
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    const total = this.state.focusSessions
+                        .filter(s => new Date(s.date) >= oneWeekAgo)
+                        .reduce((acc, s) => acc + s.duration, 0);
+                    return `⏱️ In the past week you've focused for ${Math.round(total/60)} minutes.`;
+                }
+
+                if (normalized.includes('suggest') || normalized.includes('what should i do')) {
+                    const pending = this.state.tasks.filter(t => !t.completed);
+                    if (pending.length === 0) return "All tasks are done! Take a break.";
+                    const random = pending[Math.floor(Math.random() * pending.length)];
+                    return `I suggest: "${random.title}"`;
+                }
+
+                if (normalized.includes('add') || normalized.includes('create') || normalized.includes('new')) {
+                    if (normalized.includes('task') || normalized.includes('todo')) {
+                        let title = normalized.replace(/.*?(add|create|new)\s*(task|todo)\s*/i, '').trim();
+                        if (title) {
+                            this.addTask(title);
+                            const response = `✅ Task "${title}" added successfully.`;
+                            this.conversationHistory.push({ role: 'bot', text: response });
+                            return response;
+                        } else {
+                            return "Please provide the task title.";
+                        }
+                    } else if (normalized.includes('habit')) {
+                        let name = normalized.replace(/.*?(add|create|new)\s*(habit)\s*/i, '').trim();
+                        if (name) {
+                            this.addHabitFromAssistant(name);
+                            const response = `🔥 Habit "${name}" added.`;
+                            this.conversationHistory.push({ role: 'bot', text: response });
+                            return response;
+                        } else {
+                            return "Please provide the habit name.";
+                        }
+                    }
+                }
+
+                const intents = [
+                    { name: 'tasks_pending', keywords: ['task', 'pending'], handler: () => { const pending = this.state.tasks.filter(t => !t.completed).length; const total = this.state.tasks.length; if (total === 0) return "📭 You have no tasks."; return `📋 You have ${total} tasks, ${pending} still pending.`; } },
+                    { name: 'tasks_completed_today', keywords: ['today', 'tasks', 'completed'], handler: () => { const today = getSanDiegoNow().toDateString(); const completedToday = this.state.tasks.filter(t => t.completed && new Date(t.completedAt || 0).toDateString() === today).length; return `✅ Today you completed ${completedToday} tasks.`; } },
+                    { name: 'last_task', keywords: ['last', 'completed', 'task'], handler: () => { const lastTask = this.state.tasks.filter(t => t.completed).pop(); if (lastTask) return `🔚 Last completed task: "${lastTask.title}".`; return "No tasks completed yet."; } },
+                    { name: 'habits_today', keywords: ['habit', 'today'], handler: () => { const completed = this.state.habits.filter(h => h.completedToday).length; const total = this.state.habits.length; if (total === 0) return "📭 No habits recorded."; return `🔥 Today you completed ${completed} out of ${total} habits.`; } },
+                    { name: 'goals_count', keywords: ['goal', 'status'], handler: () => { const total = this.state.goals.length; const completed = this.state.goals.filter(g => g.current >= g.target).length; return `🎯 You have ${total} goals, ${completed} completed.`; } },
+                    { name: 'xp', keywords: ['xp', 'points'], handler: () => `✨ You have ${this.state.xp} XP.` },
+                    { name: 'focus_today', keywords: ['focus', 'today'], handler: () => { const minutes = this.totalFocusToday(); return `⏱️ Today you've focused for ${Math.round(minutes)} minutes.`; } },
+                    { name: 'reminders_today', keywords: ['reminder', 'today'], handler: () => { const todayReminders = this.state.reminders; if (todayReminders.length === 0) return "⏰ No reminders for today."; return `⏰ You have ${todayReminders.length} reminders: ${todayReminders.map(r => r.text).join(', ')}`; } },
+                    { name: 'weekly_today', keywords: ['plan', 'today', 'schedule'], handler: () => { const todayName = getSanDiegoNow().toLocaleDateString('en-US', { weekday: 'long', timeZone: SAN_DIEGO_TZ }); const tasksToday = Object.entries(this.state.weeklyData).filter(([key]) => key.startsWith(todayName)).map(([_, val]) => { const cell = typeof val === 'string' ? { text: val, completed: false } : val; return cell.text; }).filter(v => v.trim() !== ""); const response = tasksToday.length > 0 ? `📅 Today (${todayName}) you have: ${tasksToday.join(', ')}` : `📅 Today (${todayName}) no plans scheduled.`; this.lastIntent = 'weekly_today'; return response; } },
+                    { name: 'weekly_tomorrow', keywords: ['plan', 'tomorrow', 'schedule'], handler: () => this.handleWeeklyTomorrow() },
+                    { name: 'notes_search', keywords: ['note', 'search', 'find'], handler: (input) => { const query = input.replace(/note|search|find/gi, '').trim(); if (!query) return "What should I search for in notes?"; const found = this.state.notes.filter(n => n.title.includes(query) || n.content.includes(query)); if (found.length === 0) return `❌ No notes found matching "${query}".`; return `📝 Found ${found.length} note(s). Example: "${found[0].title}"`; } },
+                    { name: 'summary', keywords: ['summary', 'today', 'report'], handler: () => { const tasksPending = this.state.tasks.filter(t => !t.completed).length; const habitsCompleted = this.state.habits.filter(h => h.completedToday).length; const focusMinutes = Math.round(this.totalFocusToday()); const xp = this.state.xp; return `📊 Today's Summary:\n✅ Pending Tasks: ${tasksPending}\n🔥 Habits Completed: ${habitsCompleted}\n⏱️ Focus: ${focusMinutes} min\n✨ XP: ${xp}`; } }
+                ];
+
+                let bestIntent = null;
+                let bestScore = 0;
+                for (const intent of intents) {
+                    let score = 0;
+                    for (const kw of intent.keywords) {
+                        for (const word of words) {
+                            const dist = this.levenshtein(kw, word);
+                            if (dist <= 1) {
+                                score += 2;
+                            } else if (word.includes(kw) || kw.includes(word)) {
+                                score += 1;
+                            }
+                        }
+                    }
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestIntent = intent;
+                    }
+                }
+
+                if (bestIntent && bestScore > 0) {
+                    this.lastIntent = bestIntent.name;
+                    const response = bestIntent.handler(input);
+                    this.conversationHistory.push({ role: 'bot', text: response });
+                    return response;
+                }
+
+                if (normalized.includes('next') || normalized.includes('after')) {
+                    return "What do you mean? Try asking 'tomorrow's plan' or something specific.";
+                }
+
+                const fallback = "🤔 I didn't understand. You can ask me about tasks, habits, goals, schedule, reminders, focus, and XP.";
+                this.conversationHistory.push({ role: 'bot', text: fallback });
+                return fallback;
+            },
+
+            handleWeeklyTomorrow() {
+                const tomorrow = new Date(getSanDiegoNow());
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowName = tomorrow.toLocaleDateString('en-US', { weekday: 'long', timeZone: SAN_DIEGO_TZ });
+                const tasksTomorrow = Object.entries(this.state.weeklyData).filter(([key]) => key.startsWith(tomorrowName)).map(([_, val]) => { const cell = typeof val === 'string' ? { text: val, completed: false } : val; return cell.text; }).filter(v => v.trim() !== "");
+                return tasksTomorrow.length > 0 ? `📅 Tomorrow (${tomorrowName}) you have: ${tasksTomorrow.join(', ')}` : `📅 Tomorrow (${tomorrowName}) nothing scheduled.`;
+            },
+
+            addHabitFromAssistant(name) {
+                if (!name) return;
+                const newHabit = { id: Date.now(), name, streak: 0, completedToday: false, lastDone: null };
+                this.state.habits.push(newHabit);
+                this.save();
+                this.toast('Habit added');
+                if (this.state.currentView === 'habits') this.renderHabitsList();
+            },
+
+            addTask(title) {
+                if(!title) return;
+                this.state.tasks.push({ id: Date.now(), title, completed: false, priority: 'medium', completedAt: null });
+                this.save();
+                this.render();
+                this.toast('Task added successfully');
+            },
+
+            toggleTask(id) {
+                const t = this.state.tasks.find(t => t.id === id);
+                if(t) {
+                    t.completed = !t.completed;
+                    t.completedAt = t.completed ? new Date().toISOString() : null;
+                }
+                this.save();
+                this.render();
+            },
+
+            deleteTask(id) {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    this.state.tasks = this.state.tasks.filter(t => t.id !== id);
+                    this.save();
+                    this.render();
+                }
+            },
+
+            calculateProductivityScore() {
+                if (this.state.tasks.length === 0) return 0;
+                const taskRatio = (this.state.tasks.filter(t => t.completed).length / this.state.tasks.length) * 100;
+                return Math.round(taskRatio);
+            },
+
+            animateValue(id, start, end, duration) {
+                const obj = document.getElementById(id);
+                if (!obj) return;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) window.requestAnimationFrame(step);
+                };
+                window.requestAnimationFrame(step);
+            },
+
+            toggleTheme() {
+                const body = document.body;
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            },
+
+            toast(msg, type = '') {
+                const t = document.createElement('div');
+                t.style.cssText = `position:fixed; bottom:20px; left:20px; background:${type === 'success' ? 'var(--success)' : 'var(--primary)'}; color:white; padding:12px 24px; border-radius:10px; z-index:9999; animation:fadeIn 0.3s ease;`;
+                t.innerText = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            },
+
+            startClock() {
+                setInterval(() => {
+                    const el = document.getElementById('clock');
+                    if(el) {
+                        el.innerText = new Date().toLocaleTimeString('en-US', { timeZone: SAN_DIEGO_TZ });
+                    }
+                }, 1000);
+            },
+
+            attachEvents() {
+                document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+                    item.onclick = (e) => {
+                        const view = e.currentTarget.dataset.view;
+                        if (view) {
+                            document.querySelectorAll('.nav-item[data-view]').forEach(n => n.classList.remove('active'));
+                            e.currentTarget.classList.add('active');
+                            this.state.currentView = view;
+                            this.render();
+                        }
+                    };
+                });
+
+                document.getElementById('exportBtn')?.addEventListener('click', () => this.exportData());
+                document.getElementById('mobileExportBtn')?.addEventListener('click', () => this.exportData());
+                document.getElementById('importBtn')?.addEventListener('click', () => document.getElementById('importFile').click());
+                document.getElementById('mobileImportBtn')?.addEventListener('click', () => document.getElementById('importFile').click());
+
+                document.getElementById('importFile').addEventListener('change', (e) => this.importData(e));
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && this.timer.running) {
+                        if (this.timer.interval) {
+                            clearInterval(this.timer.interval);
+                            this.timer.interval = null;
+                        }
+                        localStorage.setItem('zenith_timer_start', JSON.stringify({
+                            startTime: Date.now(),
+                            remaining: this.timer.timeLeft,
+                            total: this.timer.totalSeconds
+                        }));
+                    } else if (!document.hidden && !this.timer.running) {
+                        const saved = localStorage.getItem('zenith_timer_start');
+                        if (saved) {
+                            try {
+                                const { startTime, remaining, total } = JSON.parse(saved);
+                                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                                const newTimeLeft = Math.max(0, remaining - elapsed);
+                                this.timer.timeLeft = newTimeLeft;
+                                this.timer.totalSeconds = total;
+                                if (newTimeLeft > 0) {
+                                    this.timer.running = true;
+                                    this.startTimer();
+                                } else {
+                                    localStorage.removeItem('zenith_timer_start');
+                                    this.completeTimer();
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                });
+
+                window.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        document.getElementById('cmd-palette').classList.add('open');
+                        document.getElementById('cp-input').focus();
+                    }
+                    if (e.key === 'Escape') {
+                        document.getElementById('cmd-palette').classList.remove('open');
+                        const chat = document.getElementById('chat-window');
+                        if (chat.style.display === 'flex') chat.style.display = 'none';
+                        this.closeDrawer();
+                    }
+                });
+
+                document.getElementById('cp-input').onkeypress = (e) => {
+                    if(e.key === 'Enter') {
+                        const cmd = e.target.value;
+                        if(cmd.toLowerCase().startsWith('add ')) {
+                            this.addTask(cmd.replace(/add /i, ''));
+                        }
+                        e.target.value = '';
+                        document.getElementById('cmd-palette').classList.remove('open');
+                    }
+                };
+            }
+        };
+
+        window.app = app;
+        app.init();
+    </script>
+</body>
+</html>
